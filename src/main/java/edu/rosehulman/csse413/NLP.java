@@ -93,11 +93,20 @@ public class NLP {
           IndexedWord root = dependencies.getFirstRoot();
           // type of root
           String type = root.tag();
-          switch (type) {
-	          case "VB": processVerbPhrase(dependencies, root); break;
-	          case "NN": processNounPhrase(dependencies, root); break;
-	          case "DT": processDeterminer(dependencies, root); break;
-	          default: System.out.println("Cannot identify sentence structure.");
+//          switch (type) {
+//	          case "VB": processVerbPhrase(dependencies, root); break;
+//	          case "NN": processNounPhrase(dependencies, root); break;
+//	          case "DT": processDeterminer(dependencies, root); break;
+//	          default: System.out.println("Cannot identify sentence structure.");
+//          }
+          if(type.equals("VB")) {
+        	  processVerbPhrase(dependencies, root);
+          } else if(type.equals("NN")) {
+        	  processNounPhrase(dependencies, root);
+          } else if(type.equals("DT")) {
+        	  processDeterminer(dependencies, root);
+          } else {
+        	  System.out.println("Cannot identify sentence structure.");
           }
           // next step, need to identify further components of sentence
 
