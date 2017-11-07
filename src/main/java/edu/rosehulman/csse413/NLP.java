@@ -1,6 +1,9 @@
 package edu.rosehulman.csse413;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,25 +42,38 @@ public class NLP {
     
         
 //  		StanfordCoreNLP coreNLP = new StanfordCoreNLP(props);
-//        File foo = new File("foo.txt");
+//        File foo = new File("lincoln.txt");
 //        Collection<File> files = new ArrayList<File>();
 //        files.add(foo);
 //        try {
-//			coreNLP.processFiles(files);
+//			coreNLP.processFiles(files, true);
 //		} catch (IOException e) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-//		
+		
+        StringBuilder lincolnFile = new StringBuilder();
+        String line = "";
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader("paragraph.txt"));
+            while((line = bufferedReader.readLine()) != null) {
+                lincolnFile.append(line + " ");
+            }   
+            bufferedReader.close();         
+        } catch (FileNotFoundException e) {
+        	System.out.println("File not found");
+        } catch (IOException e) {
+        	System.out.println("IO Exception");
+        }
  
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
         // read some text in the text variable
-        String text = "Pick up that block"; 
+//        String text = "Pick up that block"; 
 //        String text = "In 1921, Einstein received the Nobel Prize for his original work on the photoelectric effect."; 
 //        String text = "Did Einstein receive the Nobel Prize?"; 
 //        String text = "Mary saw a ring through the window and asked John for it.";
         // create an empty Annotation just with the given text
-        Annotation document = new Annotation(text);
+        Annotation document = new Annotation(lincolnFile.toString());
         
         // run all Annotators on this text
         pipeline.annotate(document);
@@ -99,15 +115,15 @@ public class NLP {
 //	          case "DT": processDeterminer(dependencies, root); break;
 //	          default: System.out.println("Cannot identify sentence structure.");
 //          }
-          if(type.equals("VB")) {
-        	  processVerbPhrase(dependencies, root);
-          } else if(type.equals("NN")) {
-        	  processNounPhrase(dependencies, root);
-          } else if(type.equals("DT")) {
-        	  processDeterminer(dependencies, root);
-          } else {
-        	  System.out.println("Cannot identify sentence structure.");
-          }
+//          if(type.equals("VB")) {
+//        	  processVerbPhrase(dependencies, root);
+//          } else if(type.equals("NN")) {
+//        	  processNounPhrase(dependencies, root);
+//          } else if(type.equals("DT")) {
+//        	  processDeterminer(dependencies, root);
+//          } else {
+//        	  System.out.println("Cannot identify sentence structure. Tag is " + type);
+//          }
           // next step, need to identify further components of sentence
 
           
