@@ -55,7 +55,7 @@ public class NLP {
         StringBuilder lincolnFile = new StringBuilder();
         String line = "";
         try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader("paragraph.txt"));
+            BufferedReader bufferedReader = new BufferedReader(new FileReader("lincoln.txt"));
             while((line = bufferedReader.readLine()) != null) {
                 lincolnFile.append(line + " ");
             }   
@@ -68,7 +68,7 @@ public class NLP {
  
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
         // read some text in the text variable
-//        String text = "Pick up that block"; 
+        String text = "Pick up that block"; 
 //        String text = "In 1921, Einstein received the Nobel Prize for his original work on the photoelectric effect."; 
 //        String text = "Did Einstein receive the Nobel Prize?"; 
 //        String text = "Mary saw a ring through the window and asked John for it.";
@@ -93,6 +93,7 @@ public class NLP {
             // this is the NER label of the token
             String ne = token.get(NamedEntityTagAnnotation.class);
 //            System.out.println("word " + word + " ,pos: " + pos + " ,ne: " + ne);
+            System.out.print(word + " ");
           }
 
 //          // this is the parse tree of the current sentence
@@ -107,14 +108,44 @@ public class NLP {
 
           // get root of parse graph
           IndexedWord root = dependencies.getFirstRoot();
+          List<Pair<GrammaticalRelation,IndexedWord>> s = dependencies.childPairs(root);
+          boolean and = false;
+          for (Pair<GrammaticalRelation,IndexedWord> pair : s) {
+        	  if(and) {
+        		  and = false;
+        		  String type = pair.second.tag();
+                  switch (type) {
+        	          case "VB": processVerbPhrase(dependencies, pair.second); break;
+        	          case "NN": processNounPhrase(dependencies, pair.second); break;
+        	          case "DT": processDeterminer(dependencies, pair.second); break;
+        	          case "VBD": processVBD(dependencies, pair.second); break;
+        	          case "VBN": processVBD(dependencies, pair.second); break;
+        	          case "VBZ": processVBD(dependencies, pair.second); break;
+        	          case "VBG": processVBD(dependencies, pair.second); break;
+        	          default: System.out.println("Cannot identify sentence structure.");
+                  }
+        	  }
+        	  if(pair.first.getShortName().toLowerCase().equals("cc")) {
+        		  IndexedWord andRoot = pair.second;
+        		  and = true;
+        		  
+        	  }
+          }
+          //System.out.println(root.ner());
+          
+          
           // type of root
           String type = root.tag();
-//          switch (type) {
-//	          case "VB": processVerbPhrase(dependencies, root); break;
-//	          case "NN": processNounPhrase(dependencies, root); break;
-//	          case "DT": processDeterminer(dependencies, root); break;
-//	          default: System.out.println("Cannot identify sentence structure.");
-//          }
+          switch (type) {
+	          case "VB": processVerbPhrase(dependencies, root); break;
+	          case "NN": processNounPhrase(dependencies, root); break;
+	          case "DT": processDeterminer(dependencies, root); break;
+	          case "VBD": processVBD(dependencies, root); break;
+	          case "VBN": processVBD(dependencies, root); break;
+	          case "VBZ": processVBD(dependencies, root); break;
+	          case "VBG": processVBD(dependencies, root); break;
+	          default: System.out.println("Cannot identify sentence structure.");
+          }
 //          if(type.equals("VB")) {
 //        	  processVerbPhrase(dependencies, root);
 //          } else if(type.equals("NN")) {
@@ -193,23 +224,83 @@ public class NLP {
     
     //Processes: {That, this, the} {block, sphere}
     static public void processNounPhrase(SemanticGraph dependencies, IndexedWord root){
-      List<Pair<GrammaticalRelation,IndexedWord>> s = dependencies.childPairs(root);
-
-      System.out.println("Identity of object: " + root.originalText().toLowerCase());
-      System.out.println("Type of object: " + s.get(0).second.originalText().toLowerCase());
+    	List<Pair<GrammaticalRelation,IndexedWord>> s = dependencies.childPairs(root);
+//
+//      System.out.println("Identity of object: " + root.originalText().toLowerCase());
+//      System.out.println("Type of object: " + s.get(0).second.originalText().toLowerCase());
+    	
+	    String pred = "";
+	  	String obj = root.originalText().toLowerCase();;
+	  	String sub = "";
+	  	for(Pair<GrammaticalRelation,IndexedWord> pair: s) {
+	  		if(pair.first.getShortName().toLowerCase().contains("cop")) {
+	  			pred = pair.second.originalText();
+	  		}
+	  		if(pair.first.getShortName().toLowerCase().contains("subj")) {
+	  			sub = pair.second.originalText();
+	  		}
+	  	}
+	  	System.out.println("( " + sub + ", " + pred + ", " + obj + " )");
+      
     }
     
     // Processes: {Pick up, put down} {that, this} {block, sphere}
     static public void processVerbPhrase(SemanticGraph dependencies, IndexedWord root){
         List<Pair<GrammaticalRelation,IndexedWord>> s = dependencies.childPairs(root);
-        Pair<GrammaticalRelation,IndexedWord> prt = s.get(0);
-        Pair<GrammaticalRelation,IndexedWord> dobj = s.get(1);
-        
-        List<Pair<GrammaticalRelation,IndexedWord>> newS = dependencies.childPairs(dobj.second);
-        
-        System.out.println("Action: " + root.originalText().toLowerCase() + prt.second.originalText().toLowerCase());
-        System.out.println("Type of object: " + dobj.second.originalText().toLowerCase());
-        System.out.println("Identity of object: " + newS.get(0).second.originalText().toLowerCase());
+//        Pair<GrammaticalRelation,IndexedWord> prt = s.get(0);
+//        Pair<GrammaticalRelation,IndexedWord> dobj = s.get(1);
+//        
+//        List<Pair<GrammaticalRelation,IndexedWord>> newS = dependencies.childPairs(dobj.second);
+//        
+//        System.out.println("Action: " + root.originalText().toLowerCase() + prt.second.originalText().toLowerCase());
+//        System.out.println("Type of object: " + dobj.second.originalText().toLowerCase());
+//        System.out.println("Identity of object: " + newS.get(0).second.originalText().toLowerCase());
+    	
+    	String pred = root.originalText().toLowerCase();
+    	String obj = "";
+    	String sub = "";
+    	for(Pair<GrammaticalRelation,IndexedWord> pair: s) {
+    		if(pair.first.getShortName().toLowerCase().equals("dobj")) {
+    			obj = pair.second.originalText();
+    		}
+    	}
+    	System.out.println("( " + sub + ", " + pred + ", " + obj + " )");
       }
+    
+    static public void processVBD(SemanticGraph dependencies, IndexedWord root) {
+    	List<Pair<GrammaticalRelation,IndexedWord>> s = dependencies.childPairs(root);
+    	
+    	String pred = root.originalText().toLowerCase();
+    	String obj = "";
+    	String sub = "";
+    	for(Pair<GrammaticalRelation,IndexedWord> pair: s) {
+    		if(pair.first.getShortName().toLowerCase().contains("obj")) {
+    			obj = pair.second.originalText();
+    		}
+    		if(pair.first.getShortName().toLowerCase().contains("subj")) {
+    			sub = pair.second.originalText();
+    		}
+    	}
+    	if(obj.equals("")) {
+    		for(Pair<GrammaticalRelation,IndexedWord> pair: s) {
+        		if(pair.first.getShortName().toLowerCase().contains("compound")
+        				|| pair.first.getShortName().toLowerCase().contains("nmod")
+        				|| pair.first.getShortName().toLowerCase().contains("xcomp")
+        				|| pair.first.getShortName().toLowerCase().contains("ccomp")
+        				|| pair.first.getShortName().toLowerCase().contains("advmod")) {
+        			obj = pair.second.originalText();
+        		}
+        	}
+    	}
+    	if(sub.equals("")) {
+	  		for(Pair<GrammaticalRelation,IndexedWord> pair: s) {
+		  		if(pair.first.getShortName().toLowerCase().contains("ccomp")) {
+		  			sub = pair.second.originalText();
+		  		}
+		  	}
+	  	}
+    	System.out.println("( " + sub + ", " + pred + ", " + obj + " )");
+    	
+    }
 
 }
